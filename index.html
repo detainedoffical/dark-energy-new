@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dark Energy</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none}
+:root{--accent:#ff1a1a;--accent-rgb:255,26,26}
+html,body{min-height:100vh;font-family:'Inter',sans-serif;color:#fff;background:#000;overflow-x:hidden}
+
+.splash{position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .9s,visibility .9s;cursor:pointer}
+.splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+.splash-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,8vw,100px);letter-spacing:8px;text-align:center;color:#fff;line-height:.95;text-shadow:0 0 40px rgba(255,255,255,.5),0 0 80px rgba(var(--accent-rgb),.4)}
+.splash-sub{font-size:clamp(11px,1.3vw,14px);letter-spacing:8px;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:22px}
+.splash-by{font-family:'Bebas Neue',sans-serif;font-size:clamp(20px,3vw,30px);letter-spacing:6px;color:var(--accent);margin-top:10px;text-shadow:0 0 30px rgba(var(--accent-rgb),.8)}
+.splash-hint{position:absolute;bottom:40px;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.35)}
+
+.bg-dark{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,rgba(0,0,0,.75) 100%);z-index:-2}
+.bg-color{position:fixed;inset:0;background:transparent;z-index:-3;transition:background 1s,opacity 1s;opacity:0}
+
+.auth-fixed{position:fixed;top:24px;left:24px;display:flex;gap:8px;z-index:102}
+.auth-btn{padding:0 20px;height:46px;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);backdrop-filter:blur(14px);border-radius:12px;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#fff;transition:all .4s}
+.auth-btn:hover{background:rgba(var(--accent-rgb),.15);border-color:var(--accent);box-shadow:0 0 25px rgba(var(--accent-rgb),.7);transform:translateY(-2px)}
+.auth-btn.primary{background:var(--accent);border-color:var(--accent);box-shadow:0 0 20px rgba(var(--accent-rgb),.5)}
+
+.social-fixed{position:fixed;top:24px;right:200px;display:flex;gap:10px;z-index:105}
+.social-fixed-btn{width:42px;height:42px;border-radius:10px;background:transparent;border:none;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.75);transition:all .35s;text-decoration:none;cursor:pointer}
+.social-fixed-btn svg{width:24px;height:24px}
+.social-fixed-btn:hover{color:var(--accent);transform:translateY(-3px) scale(1.1);filter:drop-shadow(0 0 12px rgba(var(--accent-rgb),.9))}
+.menu-btn{position:fixed;top:24px;right:24px;padding:0 20px;height:46px;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);backdrop-filter:blur(14px);border-radius:12px;cursor:pointer;z-index:100;display:flex;align-items:center;gap:10px;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#fff;transition:all .4s}
+.menu-btn svg{width:16px;height:16px}
+.menu-btn:hover{background:rgba(var(--accent-rgb),.15);border-color:var(--accent);box-shadow:0 0 25px rgba(var(--accent-rgb),.7);transform:translateY(-2px)}
+
+.side-panel{position:fixed;top:20px;right:20px;bottom:20px;width:420px;max-width:calc(92vw - 40px);background:rgba(10,10,12,.9);backdrop-filter:blur(32px);border:1.5px solid rgba(var(--accent-rgb),.5);border-radius:20px;z-index:90;transform:translateX(calc(100% + 40px));transition:transform .6s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;box-shadow:0 0 40px rgba(var(--accent-rgb),.3);overflow:hidden}
+.side-panel.open{transform:translateX(0)}
+.panel-header{padding:26px 26px 0}
+.panel-title{font-size:20px;font-weight:900;color:#fff;text-transform:uppercase}
+.panel-title::before{content:'◆';color:var(--accent);font-size:12px;margin-right:10px}
+.tabs{display:flex;gap:4px;padding:18px 26px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.tab{flex:1;padding:12px 6px;border:none;background:transparent;color:rgba(255,255,255,.45);font-family:'Inter',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-radius:8px 8px 0 0;transition:all .35s;position:relative}
+.tab.active{color:var(--accent);background:rgba(255,255,255,.06)}
+.tab.active::after{content:'';position:absolute;bottom:-1px;left:10%;width:80%;height:2px;background:var(--accent);box-shadow:0 0 12px var(--accent);border-radius:2px}
+.panel-body{flex:1;overflow-y:auto;padding:22px 26px 30px}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.section-label{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.35);margin:20px 0 12px}
+.section-label:first-child{margin-top:0}
+.row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:12px;margin-bottom:9px}
+.row-label{font-size:13px;font-weight:600;color:#fff}
+.row-sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+.switch{position:relative;width:44px;height:24px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:rgba(255,255,255,.15);border-radius:24px;cursor:pointer;transition:all .4s}
+.slider::before{content:'';position:absolute;height:16px;width:16px;left:4px;top:4px;background:#fff;border-radius:50%;transition:all .4s}
+.switch input:checked + .slider{background:var(--accent);box-shadow:0 0 18px rgba(var(--accent-rgb),.7)}
+.switch input:checked + .slider::before{transform:translateX(20px)}
+.palette{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.color-dot{width:42px;height:42px;border-radius:50%;cursor:pointer;border:3px solid rgba(255,255,255,.15);transition:all .4s}
+.color-dot:hover{transform:scale(1.12)}
+.color-dot.active{border-color:#fff;box-shadow:0 0 22px currentColor}
+.color-dot[data-color="#ff1a1a"]{background:#ff1a1a;color:#ff1a1a}
+.color-dot[data-color="#2196f3"]{background:#2196f3;color:#2196f3}
+.color-dot[data-color="#ffb300"]{background:#ffb300;color:#ffb300}
+.color-dot[data-color="#43a047"]{background:#43a047;color:#43a047}
+.color-dot[data-color="#9c27b0"]{background:#9c27b0;color:#9c27b0}
+.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.lang-card{padding:13px 8px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;cursor:pointer;transition:all .4s;text-align:center}
+.lang-card:hover{background:rgba(255,255,255,.08);transform:translateY(-3px)}
+.lang-card.active{border-color:var(--accent);background:rgba(var(--accent-rgb),.12);box-shadow:0 0 20px rgba(var(--accent-rgb),.4)}
+.lang-card .flag{font-size:22px}
+.lang-card .name{font-size:11px;font-weight:700;margin-top:6px;color:#fff}
+.brand{position:fixed;top:80px;left:40px;font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:5px;color:#fff;z-index:5}
+.brand span{color:var(--accent)}
+body.clean-mode .brand,body.clean-mode .dots,body.clean-mode .flavor-name,body.clean-mode .select-btn,body.clean-mode .arrow,body.clean-mode .tools,body.clean-mode .counter{opacity:0;pointer-events:none}
+body.hide-dots .dots{opacity:0;pointer-events:none}
+body.hide-arrows .arrow{opacity:0;pointer-events:none}
+
+.stage{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;perspective:1400px;padding:100px 20px 140px}
+.carousel{display:flex;align-items:center;justify-content:center;gap:40px;width:100%;max-width:1000px}
+.can-wrap{width:260px;height:480px;display:flex;align-items:center;justify-content:center;transform-style:preserve-3d;transition:transform 1s cubic-bezier(.22,1,.36,1)}
+.can{position:relative;width:220px;height:440px;display:flex;align-items:center;justify-content:center}
+.can-svg{position:absolute;inset:0;width:100%;height:100%;z-index:2;filter:drop-shadow(0 35px 45px rgba(0,0,0,.85))}
+.can-body-fill{transition:fill .6s ease}
+.can-print{position:absolute;top:0;left:0;width:100%;height:100%;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;padding:60px 20px}
+.print-ribbon{position:absolute;top:18%;left:0;right:0;padding:5px 0;background:rgba(0,0,0,.6);border-top:1px solid rgba(255,255,255,.4);border-bottom:1px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;gap:10px}
+.print-ribbon span{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:6px;color:#fff}
+.print-title{font-family:'Bebas Neue',sans-serif;font-size:80px;letter-spacing:2px;color:#fff;line-height:.82;text-align:center;text-shadow:0 5px 16px rgba(0,0,0,1),0 0 30px rgba(255,255,255,.6)}
+.print-subtitle{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:16px;color:#fff;margin-top:2px;text-align:center;padding-left:16px}
+.print-divider{display:flex;align-items:center;gap:10px;margin:20px 0 12px}
+.print-divider::before,.print-divider::after{content:'';width:34px;height:1px;background:rgba(255,255,255,.8)}
+.print-divider .dot{width:5px;height:5px;border-radius:50%;background:#fff}
+.print-flavor{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:6px;color:#fff;text-align:center;text-shadow:0 3px 10px rgba(0,0,0,.95)}
+.print-volume{margin-top:18px;padding:4px 16px;border:1px solid rgba(255,255,255,.75);border-radius:20px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:4px;color:#fff;background:rgba(0,0,0,.45);white-space:nowrap}
+.print-footer{position:absolute;bottom:14%;left:50%;transform:translateX(-50%)}
+.print-footer span{font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:4px;color:rgba(255,255,255,.85);white-space:nowrap}
+.can-shadow{position:absolute;left:10%;right:10%;bottom:-70px;height:70px;border-radius:50%;background:radial-gradient(ellipse at center,var(--glow,rgba(255,255,255,.2)) 0%,transparent 70%);filter:blur(20px);opacity:.7;z-index:1;pointer-events:none}
+.flavor-name{margin-top:40px;font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:5px;color:#fff;text-align:center;text-shadow:0 4px 30px rgba(0,0,0,.9);transition:opacity .6s,transform .6s}
+.flavor-name.switch{opacity:0;transform:translateY(12px)}
+.arrow{width:60px;height:60px;border-radius:50%;border:none;background:rgba(255,255,255,.06);backdrop-filter:blur(10px);color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .45s;flex-shrink:0}
+.arrow:hover{background:rgba(var(--accent-rgb),.15);box-shadow:0 0 25px rgba(var(--accent-rgb),.5);transform:scale(1.12);color:var(--accent)}
+.select-btn{margin-top:32px;padding:15px 48px;border:1.5px solid rgba(255,255,255,.55);background:rgba(255,255,255,.06);backdrop-filter:blur(10px);color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:3px;border-radius:50px;cursor:pointer;transition:all .45s}
+.select-btn:hover{background:var(--accent);border-color:var(--accent);box-shadow:0 0 40px rgba(var(--accent-rgb),.7);transform:translateY(-3px)}
+.select-btn.chosen{background:var(--accent);border-color:var(--accent);box-shadow:0 0 50px rgba(var(--accent-rgb),.9)}
+.tools{margin-top:20px;display:flex;gap:12px;justify-content:center}
+.tool-btn{width:46px;height:46px;border-radius:50%;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.05);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .45s;position:relative}
+.tool-btn:hover{border-color:var(--accent);background:rgba(var(--accent-rgb),.15);transform:translateY(-4px);color:var(--accent)}
+.tool-btn svg{width:18px;height:18px}
+.tool-tip{position:absolute;top:-34px;left:50%;transform:translateX(-50%);padding:4px 10px;background:rgba(0,0,0,.9);border-radius:6px;font-size:10px;white-space:nowrap;opacity:0;pointer-events:none;transition:all .3s;color:#fff}
+.tool-btn:hover .tool-tip{opacity:1}
+.dots{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:5}
+.dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:all .45s;border:none}
+.dot.active{background:var(--accent);box-shadow:0 0 15px var(--accent),0 0 30px var(--accent);transform:scale(1.5)}
+.counter{position:fixed;bottom:40px;right:40px;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.35);z-index:5;font-weight:700;text-transform:uppercase}
+.counter b{color:#fff}
+.auth-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(20px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.auth-modal.open{display:flex}
+.auth-box{position:relative;width:100%;max-width:420px;background:rgba(15,15,18,.95);border:1.5px solid rgba(var(--accent-rgb),.5);border-radius:20px;padding:32px;box-shadow:0 0 60px rgba(var(--accent-rgb),.4)}
+.auth-title{font-size:24px;font-weight:900;text-align:center;text-transform:uppercase;margin-bottom:6px}
+.auth-sub{font-size:12px;color:rgba(255,255,255,.45);text-align:center;margin-bottom:24px}
+.auth-field{margin-bottom:14px}
+.auth-field label{display:block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;font-weight:600}
+.auth-field input{width:100%;padding:13px 16px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:all .35s;-webkit-user-select:text;user-select:text}
+.auth-field input:focus{border-color:var(--accent);background:rgba(var(--accent-rgb),.08)}
+.auth-submit{width:100%;padding:14px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .4s;margin-top:8px}
+.auth-submit:hover{box-shadow:0 0 30px rgba(var(--accent-rgb),.7);transform:translateY(-2px)}
+.auth-error{padding:10px;background:rgba(255,26,26,.15);border:1px solid #ff1a1a;border-radius:8px;color:#ff8080;font-size:12px;text-align:center;margin-top:12px;display:none}
+.auth-error.show{display:block}
+.auth-close{position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px}
+.auth-close:hover{background:rgba(255,26,26,.2);border-color:#ff1a1a}
+.auth-success{padding:20px;text-align:center}
+.auth-success .check{font-size:48px;margin-bottom:12px;color:var(--accent)}
+.auth-success h3{font-size:18px;font-weight:800;margin-bottom:8px}
+.auth-success p{font-size:13px;color:rgba(255,255,255,.5)}
+@media (max-width:700px){
+  .auth-fixed{top:18px;left:18px;gap:6px}
+  .auth-btn{padding:0 12px;height:40px;font-size:10px}
+  .menu-btn{height:40px;padding:0 12px;top:18px;right:18px;font-size:10px}
+  .social-fixed{top:70px;right:18px;gap:6px}
+  .social-fixed-btn{width:34px;height:34px}
+  .social-fixed-btn svg{width:20px;height:20px}
+  .side-panel{top:10px;right:10px;bottom:10px;width:calc(100vw - 20px);max-width:calc(100vw - 20px);border-radius:16px}
+  .carousel{gap:10px}
+  .can-wrap{width:200px;height:380px}
+  .can{width:170px;height:340px}
+  .print-title{font-size:60px}
+  .print-subtitle{font-size:18px;letter-spacing:12px}
+  .print-flavor{font-size:22px}
+  .flavor-name{font-size:32px;margin-top:26px}
+  .arrow{width:46px;height:46px;font-size:20px}
+  .select-btn{padding:13px 32px;font-size:11px}
+  .brand{top:130px;left:20px;font-size:24px}
+  .counter{right:20px;bottom:20px;font-size:9px}
+}
+</style>
+</head>
+<body>
+<div class="splash" id="splash">
+  <div class="splash-title">THE BEST<br>ENERGY DRINKS</div>
+  <div class="splash-sub">Premium collection</div>
+  <div class="splash-by">BY DETAINED</div>
+  <div class="splash-hint" data-i18n="splashHint">Нажми любую клавишу</div>
+</div>
+<div class="bg-color" id="bgColor"></div>
+<div class="bg-dark"></div>
+<div class="brand">DARK<span>·</span>ENERGY</div>
+<div class="counter"><b id="counterVal">0</b> SWITCHES</div>
+
+<div class="social-fixed">
+  <a href="https://steamcommunity.com/profiles/76561199592687522/" target="_blank" class="social-fixed-btn" title="Steam"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.605 0 11.979 0zM7.54 18.21l-1.473-.61c.262.543.714.999 1.314 1.25 1.297.539 2.793-.076 3.332-1.375.263-.63.264-1.319.005-1.949s-.75-1.121-1.377-1.383c-.624-.26-1.29-.249-1.878-.03l1.523.63c.956.4 1.409 1.5 1.009 2.455-.397.957-1.497 1.41-2.454 1.012H7.54zm11.415-9.303c0-1.662-1.353-3.015-3.015-3.015-1.665 0-3.015 1.353-3.015 3.015 0 1.665 1.35 3.015 3.015 3.015 1.663 0 3.015-1.35 3.015-3.015zm-5.273-.005c0-1.252 1.013-2.266 2.265-2.266 1.249 0 2.266 1.014 2.266 2.266 0 1.251-1.017 2.265-2.266 2.265-1.253 0-2.265-1.014-2.265-2.265z"/></svg></a>
+  <a href="https://discord.com/users/darkoil1" target="_blank" class="social-fixed-btn" title="Discord"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.099.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></a>
+  <a href="https://t.me/gleburak" target="_blank" class="social-fixed-btn" title="Telegram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg></a>
+</div>
+
+<div class="auth-fixed">
+  <button class="auth-btn" id="loginBtn" data-i18n="loginBtn">Вход</button>
+  <button class="auth-btn primary" id="registerBtn" data-i18n="registerBtn">Регистрация</button>
+</div>
+
+<button class="menu-btn" id="menuBtn">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+  <span data-i18n="settings">Настройки</span>
+</button>
+
+<aside class="side-panel" id="sidePanel">
+  <div class="panel-header"><div class="panel-title" data-i18n="panelTitle">НАСТРОЙКИ</div></div>
+  <div class="tabs">
+    <button class="tab active" data-tab="visual" data-i18n="tabVisual">Визуал</button>
+    <button class="tab" data-tab="color" data-i18n="tabColor">Цвет</button>
+    <button class="tab" data-tab="lang" data-i18n="tabLang">Язык</button>
+  </div>
+  <div class="panel-body">
+    <div class="tab-content active" data-content="visual">
+      <div class="section-label" data-i18n="secInterface">Интерфейс</div>
+      <div class="row"><div><div class="row-label" data-i18n="cleanMode">Чистый режим</div><div class="row-sub" data-i18n="cleanModeSub">Только настройки и банка</div></div><label class="switch"><input type="checkbox" id="cleanMode"><span class="slider"></span></label></div>
+      <div class="row"><div><div class="row-label" data-i18n="hideDots">Скрыть точки</div><div class="row-sub" data-i18n="hideDotsSub">Индикатор внизу</div></div><label class="switch"><input type="checkbox" id="hideDots"><span class="slider"></span></label></div>
+      <div class="row"><div><div class="row-label" data-i18n="hideArrows">Скрыть стрелки</div><div class="row-sub" data-i18n="hideArrowsSub">Листать свайпом</div></div><label class="switch"><input type="checkbox" id="hideArrows"><span class="slider"></span></label></div>
+      <div class="section-label" style="margin-top:22px" data-i18n="secSound">Звук</div>
+      <div class="row"><div><div class="row-label" data-i18n="soundOn">Звук перелистывания</div><div class="row-sub" data-i18n="soundOnSub">Клик при смене вкуса</div></div><label class="switch"><input type="checkbox" id="soundToggle" checked><span class="slider"></span></label></div>
+      <div class="row" style="cursor:pointer" id="resetBtn"><div><div class="row-label" data-i18n="resetBtn">Сбросить всё</div><div class="row-sub" data-i18n="resetBtnSub">Очистить память сайта</div></div><span style="font-size:18px">🗑</span></div>
+    </div>
+    <div class="tab-content" data-content="color">
+      <div class="section-label" data-i18n="secAccent">Акцентный цвет сайта</div>
+      <div class="palette" id="palette">
+        <div class="color-dot active" data-color="#ff1a1a"></div>
+        <div class="color-dot" data-color="#2196f3"></div>
+        <div class="color-dot" data-color="#ffb300"></div>
+        <div class="color-dot" data-color="#43a047"></div>
+        <div class="color-dot" data-color="#9c27b0"></div>
+      </div>
+      <div class="section-label" style="margin-top:26px" data-i18n="secTint">Цвет от банки</div>
+      <div class="row"><div><div class="row-label" data-i18n="tintBg">Перекрашивать фон</div><div class="row-sub" data-i18n="tintBgSub">Под цвет выбранной банки</div></div><label class="switch"><input type="checkbox" id="colorBg" checked><span class="slider"></span></label></div>
+    </div>
+    <div class="tab-content" data-content="lang">
+      <div class="section-label" data-i18n="secLang">Выберите язык</div>
+      <div class="lang-grid">
+        <div class="lang-card active" data-lang="ru"><div class="flag">🇷🇺</div><div class="name">Русский</div></div>
+        <div class="lang-card" data-lang="en"><div class="flag">🇬🇧</div><div class="name">English</div></div>
+        <div class="lang-card" data-lang="sr"><div class="flag">🇷🇸</div><div class="name">Srpski</div></div>
+        <div class="lang-card" data-lang="uk"><div class="flag">🇺🇦</div><div class="name">Українська</div></div>
+        <div class="lang-card" data-lang="de"><div class="flag">🇩🇪</div><div class="name">Deutsch</div></div>
+        <div class="lang-card" data-lang="fr"><div class="flag">🇫🇷</div><div class="name">Français</div></div>
+        <div class="lang-card" data-lang="es"><div class="flag">🇪🇸</div><div class="name">Español</div></div>
+        <div class="lang-card" data-lang="zh"><div class="flag">🇨🇳</div><div class="name">中文</div></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="stage">
+  <div class="carousel">
+    <div class="arrow" id="prev">‹</div>
+    <div class="can-wrap" id="canWrap">
+      <div class="can" id="can">
+        <svg class="can-svg" viewBox="0 0 240 460" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#000" stop-opacity=".85"/>
+              <stop offset="8%" stop-color="#000" stop-opacity=".45"/>
+              <stop offset="18%" stop-color="#fff" stop-opacity=".1"/>
+              <stop offset="30%" stop-color="#fff" stop-opacity=".55"/>
+              <stop offset="42%" stop-color="#fff" stop-opacity=".95"/>
+              <stop offset="52%" stop-color="#fff" stop-opacity=".45"/>
+              <stop offset="68%" stop-color="#000" stop-opacity=".15"/>
+              <stop offset="85%" stop-color="#000" stop-opacity=".55"/>
+              <stop offset="100%" stop-color="#000" stop-opacity=".9"/>
+            </linearGradient>
+            <linearGradient id="metalTop" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fafafa"/>
+              <stop offset="30%" stop-color="#d0d0d0"/>
+              <stop offset="55%" stop-color="#8a8a8a"/>
+              <stop offset="100%" stop-color="#707070"/>
+            </linearGradient>
+            <linearGradient id="metalBottom" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2a2a2a"/>
+              <stop offset="35%" stop-color="#7a7a7a"/>
+              <stop offset="100%" stop-color="#1a1a1a"/>
+            </linearGradient>
+            <linearGradient id="rimGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fff"/>
+              <stop offset="45%" stop-color="#a8a8a8"/>
+              <stop offset="100%" stop-color="#5a5a5a"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="120" cy="46" rx="100" ry="15" fill="url(#rimGrad)" stroke="#4a4a4a"/>
+          <rect x="20" y="46" width="200" height="20" fill="url(#metalTop)"/>
+          <ellipse cx="120" cy="66" rx="94" ry="7" fill="#d0d0d0" opacity=".35"/>
+          <ellipse cx="120" cy="58" rx="32" ry="11" fill="none" stroke="#3a3a3a" stroke-width="3"/>
+          <ellipse cx="120" cy="58" rx="14" ry="5" fill="#2a2a2a"/>
+          <path class="can-body-fill" d="M24,66 Q24,44 120,44 Q216,44 216,66 L216,394 Q216,416 120,416 Q24,416 24,394 Z" fill="#555"/>
+          <path d="M24,66 Q24,44 120,44 Q216,44 216,66 L216,394 Q216,416 120,416 Q24,416 24,394 Z" fill="url(#bodyGrad)"/>
+          <rect x="82" y="66" width="22" height="350" fill="#fff" opacity=".55" filter="blur(6px)"/>
+          <rect x="56" y="66" width="7" height="350" fill="#fff" opacity=".8" filter="blur(3px)"/>
+          <ellipse cx="120" cy="394" rx="96" ry="10" fill="#000" opacity=".45"/>
+          <path d="M24,392 Q24,410 120,410 Q216,410 216,392 L216,402 Q216,420 120,420 Q24,420 24,402 Z" fill="url(#metalBottom)"/>
+        </svg>
+        <div class="can-print">
+          <div class="print-ribbon"><span>PREMIUM DRINK</span></div>
+          <div class="print-title">DARK</div>
+          <div class="print-subtitle">ENERGY</div>
+          <div class="print-divider"><span class="dot"></span></div>
+          <div class="print-flavor" id="canFlavor">BLUEBERRY</div>
+          <div class="print-volume">330 ML · EXTRA POWER</div>
+          <div class="print-footer"><span>DETAINED EDITION</span></div>
+        </div>
+        <div class="can-shadow"></div>
+      </div>
+    </div>
+    <div class="arrow" id="next">›</div>
+  </div>
+  <div class="flavor-name" id="flavorName"></div>
+  <button class="select-btn" id="selectBtn" data-i18n="selectBtn">Выбрать вкус</button>
+  <div class="tools">
+    <button class="tool-btn" id="randomBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg><span class="tool-tip" data-i18n="toolRandom">Случайный</span></button>
+  </div>
+</main>
+
+<div class="dots" id="dots"></div>
+
+<div class="auth-modal" id="authModal">
+  <div class="auth-box">
+    <button class="auth-close" id="authClose">✕</button>
+    <div id="authContent"></div>
+  </div>
+</div>
+<script>
+const i18n = {
+  ru:{settings:"Настройки",panelTitle:"НАСТРОЙКИ",tabVisual:"Визуал",tabColor:"Цвет",tabLang:"Язык",
+    secInterface:"Интерфейс",cleanMode:"Чистый режим",cleanModeSub:"Только настройки и банка",
+    hideDots:"Скрыть точки",hideDotsSub:"Индикатор внизу",hideArrows:"Скрыть стрелки",hideArrowsSub:"Листать свайпом",
+    secSound:"Звук",soundOn:"Звук перелистывания",soundOnSub:"Клик при смене вкуса",
+    resetBtn:"Сбросить всё",resetBtnSub:"Очистить память сайта",
+    secAccent:"Акцентный цвет сайта",secTint:"Цвет от банки",tintBg:"Перекрашивать фон",tintBgSub:"Под цвет выбранной банки",
+    secLang:"Выберите язык",selectBtn:"Выбрать вкус",chosen:"Выбрано",splashHint:"Нажми любую клавишу",
+    toolRandom:"Случайный",loginBtn:"Вход",registerBtn:"Регистрация",
+    regTitle:"Регистрация",regSub:"Создайте новый аккаунт",regEmail:"Почта",regName:"Имя",regPassword:"Пароль",
+    regSendCode:"Получить код",regCodeTitle:"Введите код",regCodeSub:"Код отправлен на вашу почту",regCode:"Код",regConfirm:"Подтвердить",
+    regSuccess:"Аккаунт создан!",regSuccessSub:"Теперь вы можете войти",
+    loginTitle:"Вход",loginSub:"Войдите в свой аккаунт",loginName:"Имя",loginPassword:"Пароль",loginSubmit:"Войти",
+    errWrongCode:"Введите код",errUserExists:"Такая почта уже зарегистрирована",
+    errWrongPass:"Неверное имя или пароль",errFillAll:"Заполните все поля",welcome:"Добро пожаловать"},
+  en:{settings:"Settings",panelTitle:"SETTINGS",tabVisual:"Visual",tabColor:"Color",tabLang:"Language",
+    secInterface:"Interface",cleanMode:"Clean mode",cleanModeSub:"Only settings & can",
+    hideDots:"Hide dots",hideDotsSub:"Bottom indicator",hideArrows:"Hide arrows",hideArrowsSub:"Swipe to switch",
+    secSound:"Sound",soundOn:"Switch sound",soundOnSub:"Click on flavor change",
+    resetBtn:"Reset all",resetBtnSub:"Clear site memory",
+    secAccent:"Site accent color",secTint:"Color from can",tintBg:"Tint background",tintBgSub:"Match chosen can color",
+    secLang:"Choose language",selectBtn:"Choose flavor",chosen:"Chosen",splashHint:"Press any key",
+    toolRandom:"Random",loginBtn:"Login",registerBtn:"Register",
+    regTitle:"Register",regSub:"Create a new account",regEmail:"Email",regName:"Name",regPassword:"Password",
+    regSendCode:"Get code",regCodeTitle:"Enter code",regCodeSub:"Code sent to your email",regCode:"Code",regConfirm:"Confirm",
+    regSuccess:"Account created!",regSuccessSub:"You can now log in",
+    loginTitle:"Login",loginSub:"Log into your account",loginName:"Name",loginPassword:"Password",loginSubmit:"Log in",
+    errWrongCode:"Enter the code",errUserExists:"This email is already registered",
+    errWrongPass:"Wrong name or password",errFillAll:"Fill in all fields",welcome:"Welcome"},
+  sr:{settings:"Podešavanja",panelTitle:"PODEŠAVANJA",tabVisual:"Vizuelno",tabColor:"Boja",tabLang:"Jezik",
+    secInterface:"Interfejs",cleanMode:"Čist režim",cleanModeSub:"Samo podešavanja i limenka",
+    hideDots:"Sakrij tačke",hideDotsSub:"Indikator dole",hideArrows:"Sakrij strelice",hideArrowsSub:"Prevuci za promenu",
+    secSound:"Zvuk",soundOn:"Zvuk prelistavanja",soundOnSub:"Klik pri promeni ukusa",
+    resetBtn:"Resetuj sve",resetBtnSub:"Obriši memoriju",
+    secAccent:"Boja akcenta",secTint:"Boja od limenke",tintBg:"Oboji pozadinu",tintBgSub:"Prema boji limenke",
+    secLang:"Izaberi jezik",selectBtn:"Izaberi ukus",chosen:"Izabrano",splashHint:"Pritisni bilo koje dugme",
+    toolRandom:"Slučajno",loginBtn:"Prijava",registerBtn:"Registracija",
+    regTitle:"Registracija",regSub:"Napravite novi nalog",regEmail:"Email",regName:"Ime",regPassword:"Lozinka",
+    regSendCode:"Pošalji kod",regCodeTitle:"Unesite kod",regCodeSub:"Kod poslat na email",regCode:"Kod",regConfirm:"Potvrdi",
+    regSuccess:"Nalog kreiran!",regSuccessSub:"Sada možete da se prijavite",
+    loginTitle:"Prijava",loginSub:"Prijavite se",loginName:"Ime",loginPassword:"Lozinka",loginSubmit:"Prijavi se",
+    errWrongCode:"Unesite kod",errUserExists:"Email je već registrovan",
+    errWrongPass:"Pogrešno ime ili lozinka",errFillAll:"Popunite sva polja",welcome:"Dobrodošli"},
+  uk:{settings:"Налаштування",panelTitle:"НАЛАШТУВАННЯ",tabVisual:"Вигляд",tabColor:"Колір",tabLang:"Мова",
+    secInterface:"Інтерфейс",cleanMode:"Чистий режим",cleanModeSub:"Тільки налаштування та банка",
+    hideDots:"Сховати точки",hideDotsSub:"Індикатор внизу",hideArrows:"Сховати стрілки",hideArrowsSub:"Гортати свайпом",
+    secSound:"Звук",soundOn:"Звук гортання",soundOnSub:"Клік при зміні смаку",
+    resetBtn:"Скинути все",resetBtnSub:"Очистити пам'ять",
+    secAccent:"Акцентний колір",secTint:"Колір від банки",tintBg:"Перефарбовувати фон",tintBgSub:"Під колір банки",
+    secLang:"Оберіть мову",selectBtn:"Обрати смак",chosen:"Обрано",splashHint:"Натисни будь-яку клавішу",
+    toolRandom:"Випадковий",loginBtn:"Вхід",registerBtn:"Реєстрація",
+    regTitle:"Реєстрація",regSub:"Створіть новий акаунт",regEmail:"Пошта",regName:"Ім'я",regPassword:"Пароль",
+    regSendCode:"Отримати код",regCodeTitle:"Введіть код",regCodeSub:"Код надіслано на пошту",regCode:"Код",regConfirm:"Підтвердити",
+    regSuccess:"Акаунт створено!",regSuccessSub:"Тепер можете увійти",
+    loginTitle:"Вхід",loginSub:"Увійдіть у акаунт",loginName:"Ім'я",loginPassword:"Пароль",loginSubmit:"Увійти",
+    errWrongCode:"Введіть код",errUserExists:"Ця пошта вже зареєстрована",
+    errWrongPass:"Невірне ім'я або пароль",errFillAll:"Заповніть всі поля",welcome:"Ласкаво просимо"},
+  de:{settings:"Einstellungen",panelTitle:"EINSTELLUNGEN",tabVisual:"Ansicht",tabColor:"Farbe",tabLang:"Sprache",
+    secInterface:"Oberfläche",cleanMode:"Sauberer Modus",cleanModeSub:"Nur Einstellungen und Dose",
+    hideDots:"Punkte verbergen",hideDotsSub:"Untere Anzeige",hideArrows:"Pfeile verbergen",hideArrowsSub:"Wischen",
+    secSound:"Ton",soundOn:"Wechselton",soundOnSub:"Klick beim Geschmackswechsel",
+    resetBtn:"Alles zurücksetzen",resetBtnSub:"Speicher löschen",
+    secAccent:"Akzentfarbe",secTint:"Farbe von Dose",tintBg:"HG einfärben",tintBgSub:"Passend zur Dose",
+    secLang:"Sprache wählen",selectBtn:"Geschmack wählen",chosen:"Gewählt",splashHint:"Beliebige Taste drücken",
+    toolRandom:"Zufällig",loginBtn:"Anmelden",registerBtn:"Registrieren",
+    regTitle:"Registrieren",regSub:"Neues Konto erstellen",regEmail:"E-Mail",regName:"Name",regPassword:"Passwort",
+    regSendCode:"Code holen",regCodeTitle:"Code eingeben",regCodeSub:"Code an E-Mail gesendet",regCode:"Code",regConfirm:"Bestätigen",
+    regSuccess:"Konto erstellt!",regSuccessSub:"Sie können sich anmelden",
+    loginTitle:"Anmelden",loginSub:"Melden Sie sich an",loginName:"Name",loginPassword:"Passwort",loginSubmit:"Anmelden",
+    errWrongCode:"Code eingeben",errUserExists:"E-Mail bereits registriert",
+    errWrongPass:"Falscher Name oder Passwort",errFillAll:"Alle Felder ausfüllen",welcome:"Willkommen"},
+  fr:{settings:"Paramètres",panelTitle:"PARAMÈTRES",tabVisual:"Visuel",tabColor:"Couleur",tabLang:"Langue",
+    secInterface:"Interface",cleanMode:"Mode propre",cleanModeSub:"Seulement paramètres et canette",
+    hideDots:"Cacher points",hideDotsSub:"Indicateur bas",hideArrows:"Cacher flèches",hideArrowsSub:"Glisser",
+    secSound:"Son",soundOn:"Son de changement",soundOnSub:"Clic au changement",
+    resetBtn:"Tout réinitialiser",resetBtnSub:"Effacer la mémoire",
+    secAccent:"Couleur d'accent",secTint:"Couleur de canette",tintBg:"Teinter le fond",tintBgSub:"Selon la canette",
+    secLang:"Choisir la langue",selectBtn:"Choisir saveur",chosen:"Choisi",splashHint:"Appuyez sur une touche",
+    toolRandom:"Aléatoire",loginBtn:"Connexion",registerBtn:"Inscription",
+    regTitle:"Inscription",regSub:"Créer un compte",regEmail:"E-mail",regName:"Nom",regPassword:"Mot de passe",
+    regSendCode:"Obtenir le code",regCodeTitle:"Entrez le code",regCodeSub:"Code envoyé",regCode:"Code",regConfirm:"Confirmer",
+    regSuccess:"Compte créé !",regSuccessSub:"Vous pouvez vous connecter",
+    loginTitle:"Connexion",loginSub:"Connectez-vous",loginName:"Nom",loginPassword:"Mot de passe",loginSubmit:"Se connecter",
+    errWrongCode:"Entrez le code",errUserExists:"E-mail déjà utilisé",
+    errWrongPass:"Nom ou mot de passe incorrect",errFillAll:"Remplissez tous les champs",welcome:"Bienvenue"},
+  es:{settings:"Ajustes",panelTitle:"AJUSTES",tabVisual:"Visual",tabColor:"Color",tabLang:"Idioma",
+    secInterface:"Interfaz",cleanMode:"Modo limpio",cleanModeSub:"Solo ajustes y lata",
+    hideDots:"Ocultar puntos",hideDotsSub:"Indicador abajo",hideArrows:"Ocultar flechas",hideArrowsSub:"Deslizar",
+    secSound:"Sonido",soundOn:"Sonido al cambiar",soundOnSub:"Clic al cambiar sabor",
+    resetBtn:"Restablecer todo",resetBtnSub:"Borrar memoria",
+    secAccent:"Color de acento",secTint:"Color de lata",tintBg:"Teñir fondo",tintBgSub:"Según lata",
+    secLang:"Elige idioma",selectBtn:"Elegir sabor",chosen:"Elegido",splashHint:"Pulsa cualquier tecla",
+    toolRandom:"Aleatorio",loginBtn:"Iniciar",registerBtn:"Registrarse",
+    regTitle:"Registro",regSub:"Crea una cuenta",regEmail:"Correo",regName:"Nombre",regPassword:"Contraseña",
+    regSendCode:"Obtener código",regCodeTitle:"Ingresa el código",regCodeSub:"Código enviado",regCode:"Código",regConfirm:"Confirmar",
+    regSuccess:"¡Cuenta creada!",regSuccessSub:"Ahora puedes iniciar sesión",
+    loginTitle:"Iniciar sesión",loginSub:"Entra en tu cuenta",loginName:"Nombre",loginPassword:"Contraseña",loginSubmit:"Entrar",
+    errWrongCode:"Ingresa el código",errUserExists:"Correo ya registrado",
+    errWrongPass:"Nombre o contraseña incorrectos",errFillAll:"Rellena todos los campos",welcome:"Bienvenido"},
+  zh:{settings:"设置",panelTitle:"设置",tabVisual:"视觉",tabColor:"颜色",tabLang:"语言",
+    secInterface:"界面",cleanMode:"纯净模式",cleanModeSub:"仅设置和罐子",
+    hideDots:"隐藏圆点",hideDotsSub:"底部指示器",hideArrows:"隐藏箭头",hideArrowsSub:"滑动切换",
+    secSound:"声音",soundOn:"切换声音",soundOnSub:"口味切换时轻点",
+    resetBtn:"重置全部",resetBtnSub:"清除站点记忆",
+    secAccent:"站点强调色",secTint:"罐子颜色",tintBg:"染色背景",tintBgSub:"匹配罐子颜色",
+    secLang:"选择语言",selectBtn:"选择口味",chosen:"已选择",splashHint:"按任意键",
+    toolRandom:"随机",loginBtn:"登录",registerBtn:"注册",
+    regTitle:"注册",regSub:"创建新账户",regEmail:"邮箱",regName:"姓名",regPassword:"密码",
+    regSendCode:"获取验证码",regCodeTitle:"输入验证码",regCodeSub:"验证码已发送",regCode:"验证码",regConfirm:"确认",
+    regSuccess:"账户已创建！",regSuccessSub:"现在可以登录了",
+    loginTitle:"登录",loginSub:"登录您的账户",loginName:"姓名",loginPassword:"密码",loginSubmit:"登录",
+    errWrongCode:"请输入验证码",errUserExists:"该邮箱已注册",
+    errWrongPass:"姓名或密码错误",errFillAll:"请填写所有字段",welcome:"欢迎"}
+};
+
+const flavors = [
+  { name: "Blueberry",  color: "#0d47a1", glow: "#2196f3" },
+  { name: "Watermelon", color: "#b71c1c", glow: "#ef5350" },
+  { name: "Mint",       color: "#1b5e20", glow: "#43a047" },
+  { name: "Grape",      color: "#4a148c", glow: "#9c27b0" },
+  { name: "Cola",       color: "#3e2723", glow: "#8d6e63" },
+  { name: "Mango",      color: "#e65100", glow: "#ffb300" },
+  { name: "Cherry",     color: "#880e4f", glow: "#e91e63" },
+  { name: "Lemon",      color: "#827717", glow: "#cddc39" },
+  { name: "Tropical",   color: "#bf360c", glow: "#ff7043" },
+  { name: "Citrus",     color: "#e65100", glow: "#ffa726" }
+];
+
+const store = {
+  get(k,d){ try{ var v=localStorage.getItem('de_'+k); return v===null?d:JSON.parse(v);}catch(e){return d;} },
+  set(k,v){ try{ localStorage.setItem('de_'+k,JSON.stringify(v)); }catch(e){} },
+  clear(){ ['flavor','lang','accent','colorBg','sound','users'].forEach(function(k){localStorage.removeItem('de_'+k);}); }
+};
+function users(){ return store.get('users', []); }
+function saveUsers(u){ store.set('users', u); }
+
+let current        = store.get('flavor', 0);
+let isAnimating    = false;
+let colorBgEnabled = store.get('colorBg', true);
+let chosenColor    = null;
+let lang           = store.get('lang', 'ru');
+let soundOn        = store.get('sound', true);
+let switchCount    = 0;
+
+const canWrap    = document.getElementById('canWrap');
+const canFlavor  = document.getElementById('canFlavor');
+const flavorName = document.getElementById('flavorName');
+const dotsWrap   = document.getElementById('dots');
+const selectBtn  = document.getElementById('selectBtn');
+const bgColor    = document.getElementById('bgColor');
+const counterVal = document.getElementById('counterVal');
+
+flavors.forEach(function(f,i){
+  const d = document.createElement('div');
+  d.className = 'dot' + (i===0?' active':'');
+  d.onclick = function(){ goTo(i); };
+  dotsWrap.appendChild(d);
+});
+
+function t(k){ return (i18n[lang]&&i18n[lang][k])||i18n.ru[k]||k; }
+
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var v = t(el.dataset.i18n); if (v) el.innerHTML = v;
+  });
+  document.querySelectorAll('.lang-card').forEach(function(c){
+    c.classList.toggle('active', c.dataset.lang===lang);
+  });
+  resetSelect();
+}
+
+let audioCtx=null;
+function playClick(){
+  if(!soundOn)return;
+  try{
+    if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    var o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type='sine';o.frequency.setValueAtTime(880,audioCtx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(440,audioCtx.currentTime+.08);
+    g.gain.setValueAtTime(.05,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.1);
+    o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.1);
+  }catch(e){}
+}
+
+function paintCan(){
+  var f=flavors[current];
+  var body=document.querySelector('.can-body-fill');
+  if(body){ body.setAttribute('fill',f.color); }
+  document.getElementById('can').style.setProperty('--glow',f.glow+'aa');
+  canFlavor.textContent=f.name.toUpperCase();
+  flavorName.textContent=f.name.toUpperCase();
+  applyChosenColor();
+  store.set('flavor',current);
+}
+
+function applyChosenColor(){
+  if(chosenColor&&colorBgEnabled){
+    bgColor.style.background='radial-gradient(ellipse at center,'+chosenColor.glow+'80 0%,'+chosenColor.color+'99 55%,transparent 100%)';
+    bgColor.style.opacity='0.9';
+  } else { bgColor.style.background='transparent'; bgColor.style.opacity='0'; }
+}
+
+function updateDots(){
+  Array.prototype.forEach.call(dotsWrap.children,function(d,i){ d.classList.toggle('active',i===current); });
+}
+function resetSelect(){ selectBtn.textContent=t('selectBtn'); selectBtn.classList.remove('chosen'); }
+function updateCounter(){ counterVal.textContent=switchCount; }
+
+function spinAndRender(dir){
+  if(isAnimating)return;
+  isAnimating=true;playClick();switchCount++;updateCounter();
+  flavorName.classList.add('switch');
+  canWrap.style.transition='transform .55s cubic-bezier(.22,1,.36,1)';
+  canWrap.style.transform='rotateY('+(dir*90)+'deg) scale(.88)';
+  setTimeout(function(){
+    current=(current+dir+flavors.length)%flavors.length;
+    paintCan();updateDots();resetSelect();
+    canWrap.style.transition='none';
+    canWrap.style.transform='rotateY('+(-dir*90)+'deg) scale(.88)';
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        canWrap.style.transition='transform .65s cubic-bezier(.22,1,.36,1)';
+        canWrap.style.transform='rotateY(0deg) scale(1)';
+        flavorName.classList.remove('switch');
+      });
+    });
+    setTimeout(function(){isAnimating=false;},700);
+  },550);
+}
+
+function goTo(i){ if(isAnimating||i===current)return; spinAndRender(i>current?1:-1); }
+
+document.getElementById('next').onclick=function(){spinAndRender(1);};
+document.getElementById('prev').onclick=function(){spinAndRender(-1);};
+
+var startX=0;
+canWrap.addEventListener('touchstart',function(e){startX=e.touches[0].clientX;});
+canWrap.addEventListener('touchend',function(e){
+  var dx=e.changedTouches[0].clientX-startX;
+  if(dx<-50)spinAndRender(1);
+  if(dx>50)spinAndRender(-1);
+});
+
+selectBtn.onclick=function(){
+  var f=flavors[current];chosenColor=f;
+  bgColor.style.background='radial-gradient(ellipse at center,'+f.glow+'80 0%,'+f.color+'99 55%,transparent 100%)';
+  bgColor.style.opacity='0.9';
+  selectBtn.textContent='✓ '+t('chosen')+': '+f.name;
+  selectBtn.classList.add('chosen');
+  playClick();
+};
+
+var menuBtn=document.getElementById('menuBtn');
+var sidePanel=document.getElementById('sidePanel');
+menuBtn.addEventListener('click',function(e){
+  e.stopPropagation();
+  var open=sidePanel.classList.toggle('open');
+  menuBtn.classList.toggle('active',open);
+  document.body.classList.toggle('menu-open',open);
+});
+document.addEventListener('click',function(e){
+  if(!sidePanel.classList.contains('open'))return;
+  if(sidePanel.contains(e.target)||menuBtn.contains(e.target))return;
+  sidePanel.classList.remove('open');menuBtn.classList.remove('active');
+  document.body.classList.remove('menu-open');
+});
+
+document.querySelectorAll('.tab').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active');});
+    document.querySelectorAll('.tab-content').forEach(function(x){x.classList.remove('active');});
+    tab.classList.add('active');
+    document.querySelector('.tab-content[data-content="'+tab.dataset.tab+'"]').classList.add('active');
+  });
+});
+
+function bindToggle(id,cls){
+  var el=document.getElementById(id);if(!el)return;
+  el.addEventListener('change',function(){document.body.classList.toggle(cls,el.checked);});
+}
+bindToggle('cleanMode','clean-mode');
+bindToggle('hideDots','hide-dots');
+bindToggle('hideArrows','hide-arrows');
+
+var colorBgEl=document.getElementById('colorBg');
+colorBgEl.checked=colorBgEnabled;
+colorBgEl.addEventListener('change',function(e){
+  colorBgEnabled=e.target.checked;store.set('colorBg',colorBgEnabled);applyChosenColor();
+});
+
+var soundEl=document.getElementById('soundToggle');
+soundEl.checked=soundOn;
+soundEl.addEventListener('change',function(e){
+  soundOn=e.target.checked;store.set('sound',soundOn);if(soundOn)playClick();
+});
+
+document.getElementById('resetBtn').addEventListener('click',function(){
+  store.clear();switchCount=0;updateCounter();
+  current=0;lang='ru';colorBgEnabled=true;soundOn=true;chosenColor=null;
+  colorBgEl.checked=true;soundEl.checked=true;
+  applyLang();paintCan();updateDots();
+  bgColor.style.background='transparent';bgColor.style.opacity='0';
+  playClick();
+});
+
+document.querySelectorAll('.lang-card').forEach(function(card){
+  card.addEventListener('click',function(){
+    lang=card.dataset.lang;store.set('lang',lang);applyLang();
+  });
+});
+
+document.querySelectorAll('.color-dot').forEach(function(dot){
+  dot.addEventListener('click',function(){
+    document.querySelectorAll('.color-dot').forEach(function(x){x.classList.remove('active');});
+    dot.classList.add('active');
+    var c=dot.dataset.color;
+    document.documentElement.style.setProperty('--accent',c);
+    var hex=c.replace('#','');
+    var r=parseInt(hex.substring(0,2),16);
+    var g=parseInt(hex.substring(2,4),16);
+    var b=parseInt(hex.substring(4,6),16);
+    document.documentElement.style.setProperty('--accent-rgb',r+','+g+','+b);
+    store.set('accent',c);playClick();
+  });
+});
+
+var savedAccent=store.get('accent',null);
+if(savedAccent){
+  document.querySelectorAll('.color-dot').forEach(function(d){
+    if(d.dataset.color===savedAccent){
+      document.querySelectorAll('.color-dot').forEach(function(x){x.classList.remove('active');});
+      d.classList.add('active');
+      document.documentElement.style.setProperty('--accent',savedAccent);
+      var hex=savedAccent.replace('#','');
+      var r=parseInt(hex.substring(0,2),16);
+      var g=parseInt(hex.substring(2,4),16);
+      var b=parseInt(hex.substring(4,6),16);
+      document.documentElement.style.setProperty('--accent-rgb',r+','+g+','+b);
+    }
+  });
+}
+
+document.getElementById('randomBtn').addEventListener('click',function(){
+  if(isAnimating)return;
+  var idx;do{idx=Math.floor(Math.random()*flavors.length);}while(idx===current&&flavors.length>1);
+  goTo(idx);
+});
+
+var authModal=document.getElementById('authModal');
+var authContent=document.getElementById('authContent');
+var regData={ email:'', name:'', password:'' };
+function openAuth(html){ authContent.innerHTML=html; authModal.classList.add('open'); }
+function closeAuth(){ authModal.classList.remove('open'); regData={email:'',name:'',password:''}; }
+document.getElementById('authClose').addEventListener('click',closeAuth);
+authModal.addEventListener('click',function(e){ if(e.target===authModal)closeAuth(); });
+
+document.getElementById('registerBtn').addEventListener('click',function(){
+  openAuth(
+    '<div class="auth-title">'+t('regTitle')+'</div>'+
+    '<div class="auth-sub">'+t('regSub')+'</div>'+
+    '<div class="auth-field"><label>'+t('regEmail')+'</label><input type="email" id="regEmail" placeholder="you@mail.com"></div>'+
+    '<div class="auth-field"><label>'+t('regName')+'</label><input type="text" id="regName" placeholder="Gleb"></div>'+
+    '<div class="auth-field"><label>'+t('regPassword')+'</label><input type="password" id="regPassword" placeholder="••••••••"></div>'+
+    '<button class="auth-submit" id="regStep1">'+t('regSendCode')+'</button>'+
+    '<div class="auth-error" id="authErr"></div>'
+  );
+  document.getElementById('regStep1').addEventListener('click',function(){
+    var email=document.getElementById('regEmail').value.trim();
+    var name=document.getElementById('regName').value.trim();
+    var pass=document.getElementById('regPassword').value.trim();
+    var err=document.getElementById('authErr');
+    if(!email||!name||!pass){ err.textContent=t('errFillAll'); err.classList.add('show'); return; }
+    var all=users();
+    if(all.find(function(u){return u.email===email;})){ err.textContent=t('errUserExists'); err.classList.add('show'); return; }
+    regData={email:email,name:name,password:pass};
+    authContent.innerHTML=
+      '<div class="auth-title">'+t('regCodeTitle')+'</div>'+
+      '<div class="auth-sub">'+t('regCodeSub')+'</div>'+
+      '<div class="auth-field"><label>'+t('regCode')+'</label><input type="text" id="regCode" placeholder="0000" maxlength="6" style="text-align:center;font-size:22px;letter-spacing:8px"></div>'+
+      '<button class="auth-submit" id="regStep2">'+t('regConfirm')+'</button>'+
+      '<div class="auth-error" id="authErr"></div>';
+    document.getElementById('regStep2').addEventListener('click',function(){
+      var code=document.getElementById('regCode').value.trim();
+      var err2=document.getElementById('authErr');
+      if(!code){ err2.textContent=t('errWrongCode'); err2.classList.add('show'); return; }
+      var all2=users();
+      all2.push({email:regData.email,name:regData.name,password:regData.password});
+      saveUsers(all2);
+      authContent.innerHTML='<div class="auth-success"><div class="check">✓</div><h3>'+t('regSuccess')+'</h3><p>'+t('regSuccessSub')+'</p></div>';
+      setTimeout(closeAuth,2000);
+    });
+  });
+});
+
+document.getElementById('loginBtn').addEventListener('click',function(){
+  openAuth(
+    '<div class="auth-title">'+t('loginTitle')+'</div>'+
+    '<div class="auth-sub">'+t('loginSub')+'</div>'+
+    '<div class="auth-field"><label>'+t('loginName')+'</label><input type="text" id="logName" placeholder="Gleb"></div>'+
+    '<div class="auth-field"><label>'+t('loginPassword')+'</label><input type="password" id="logPass" placeholder="••••••••"></div>'+
+    '<button class="auth-submit" id="logBtn">'+t('loginSubmit')+'</button>'+
+    '<div class="auth-error" id="authErr"></div>'
+  );
+  document.getElementById('logBtn').addEventListener('click',function(){
+    var name=document.getElementById('logName').value.trim();
+    var pass=document.getElementById('logPass').value.trim();
+    var err=document.getElementById('authErr');
+    if(!name||!pass){ err.textContent=t('errFillAll'); err.classList.add('show'); return; }
+    var all=users();
+    var found=all.find(function(u){return u.name===name&&u.password===pass;});
+    if(!found){ err.textContent=t('errWrongPass'); err.classList.add('show'); return; }
+    authContent.innerHTML='<div class="auth-success"><div class="check">✓</div><h3>'+t('welcome')+', '+name+'!</h3></div>';
+    setTimeout(closeAuth,1800);
+  });
+});
+
+var splashEl=document.getElementById('splash');
+function hideSplash(){
+  if(!splashEl||splashEl.classList.contains('hide'))return;
+  splashEl.classList.add('hide');
+  setTimeout(function(){if(splashEl.parentNode)splashEl.remove();},1000);
+}
+if(splashEl){
+  splashEl.addEventListener('click',hideSplash);
+  splashEl.addEventListener('touchstart',hideSplash);
+}
+document.addEventListener('keydown',hideSplash);
+setTimeout(hideSplash,4000);
+
+applyLang();
+paintCan();
+updateDots();
+updateCounter();
+</script>
+</body>
+</html>
